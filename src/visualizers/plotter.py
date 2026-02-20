@@ -33,15 +33,25 @@ def create_trend_chart(df, topic, output_filename="output/trend_chart.png"):
     ax.spines['bottom'].set_color('#cdd6f4')
     ax.tick_params(colors='#cdd6f4')
     
-    # Titel und Labels (Thema aufräumen: Unterstriche zu Leerzeichen)
+    # --- TITEL & UNTERTITEL (Manuelle Platzierung) ---
     topic_clean = topic.replace('_', ' ')
-    plt.title(f'Wikipedia Trend: {topic_clean}', color='#cdd6f4', fontsize=18, fontweight='bold', pad=20)
-    plt.suptitle('Tägliche Aufrufzahlen der letzten 30 Tage', color='#a6adc8', fontsize=12, y=0.92)
-    plt.xlabel('')
-    plt.ylabel('Aufrufe', color='#a6adc8')
+    
+    # Haupttitel: Mittig (0.5), ganz oben (0.96)
+    fig.text(0.5, 0.96, f'Wikipedia Trend: {topic_clean}',
+             color='#cdd6f4', fontsize=18, fontweight='bold',
+             ha='center', va='top')
+
+    # Untertitel: Mittig (0.5), etwas tiefer (0.90)
+    fig.text(0.5, 0.90, 'Tägliche Aufrufzahlen der letzten 30 Tage',
+             color='#a6adc8', fontsize=12,
+             ha='center', va='top')
+
+    # WICHTIG: Platz oben schaffen, damit das Diagramm nicht in den Text rutscht
+    plt.subplots_adjust(top=0.85)
     
     # Layout anpassen und speichern
-    plt.tight_layout()
+    # note: bbox_inches='tight' kann manchmal manuelle text-platzierung stören, 
+    # aber wir probieren es erstmal damit, da es Ränder gut entfernt.
     plt.savefig(output_filename, bbox_inches='tight', facecolor=fig.get_facecolor())
     plt.close()
     
