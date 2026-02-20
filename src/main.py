@@ -1,5 +1,6 @@
 import sys
 from extractors.wikipedia_api import get_wikipedia_data
+from visualizers.plotter import create_trend_chart
 
 def main():
     print("🚀 Starte Daily Infographic Bot...")
@@ -9,9 +10,12 @@ def main():
     df = get_wikipedia_data(thema, days=30)
     
     if df is not None:
-        print("✅ Erfolgreich extrahiert. Zeige die letzten 5 Tage:")
-        print(df.tail())
         print("🎉 Phase 1 (Extraction) ist abgeschlossen!")
+        
+        # Phase 2: Visualisierung
+        chart_path = create_trend_chart(df, thema)
+        print("🎉 Phase 2 (Visualization) ist abgeschlossen!")
+        
     else:
         print("❌ Pipeline abgebrochen, da keine Daten geladen wurden.")
 
