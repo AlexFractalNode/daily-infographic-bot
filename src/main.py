@@ -1,18 +1,19 @@
 import sys
-from extractors.wikipedia_api import get_wikipedia_data
+from extractors.wikipedia_api import get_wikipedia_data, get_top_wikipedia_trend
 from visualizers.plotter import create_trend_chart
 from publishers.social_poster import post_to_telegram
 from publishers.social_poster import post_to_twitter
 
 # === KONFIGURATION DER PLATTFORMEN ===
-# Setze hier auf 'True' (aktivieren) oder 'False' (deaktivieren)
 ENABLE_TELEGRAM = True
 ENABLE_TWITTER = False
 # =====================================
 
+
 def main():
     print("🚀 Starte Daily Infographic Bot...")
-    thema = "Künstliche_Intelligenz"
+    
+    thema = get_top_wikipedia_trend("de")
     
     # Phase 1: Extraktion
     df = get_wikipedia_data(thema, days=30)
