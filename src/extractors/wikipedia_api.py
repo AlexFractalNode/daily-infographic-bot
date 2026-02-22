@@ -76,4 +76,29 @@ def get_wikipedia_data(article, days=30, language="de.wikipedia.org"):
     df.columns = ['Datum', 'Aufrufe']
     df.set_index('Datum', inplace=True)
 
+    def get_wikipedia_summary(title, language="de"):
+    """
+    Holt die Kurzbeschreibung (den ersten Absatz) eines Wikipedia-Artikels.
+    """
+    url = f"https://{language}.wikipedia.org/api/rest_v1/page/summary/{title}"
+    headers = {
+        "User-Agent": "WikiTrendBot/1.0 (https://github.com/AlexFractalNode/social-infographic-bot)"
+    }
+    
+    try:
+        response = requests.get(url, headers=headers)
+        if response.status_code == 200:
+            data = response.json()
+            # 'extract' enthält den reinen Text ohne HTML
+            summary = data.get("extract", "")
+            
+            # Text kürzen, falls er für Telegram/Twitter zu lang ist
+            if len(summary) > 180:
+                summary = summary[:177] + "..."
+            return summary
+    except Exception as e:
+        print(f"⚠️ Konnte Zusammenfassung für {title} nicht laden: {e}")
+        
+    return "" # Gebe leeren String zurück, falls es fehlschlägt
+
     return df
