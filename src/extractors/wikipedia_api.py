@@ -76,7 +76,7 @@ def get_wikipedia_data(article, days=30, language="de.wikipedia.org"):
     df.columns = ['Datum', 'Aufrufe']
     df.set_index('Datum', inplace=True)
 
-    def get_wikipedia_summary(title, language="de"):
+def get_wikipedia_summary(title, language="de"):
     """
     Holt die Kurzbeschreibung (den ersten Absatz) eines Wikipedia-Artikels.
     """
