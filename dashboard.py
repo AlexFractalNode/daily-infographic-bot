@@ -15,7 +15,26 @@ st.markdown("Willkommen in der interaktiven Daten-Zentrale. Wähle links deine D
 
 # 2. Seitenleiste (Sidebar) für Nutzer-Eingaben
 st.sidebar.header("⚙️ Steuerung")
-days = st.sidebar.slider("Zeitraum (Tage)", min_value=7, max_value=90, value=30)
+
+# NEU: Wir packen die Steuerung in ein Formular, um API-Spam zu verhindern!
+with st.sidebar.form("steuerung_form"):
+    # step=7 sorgt dafür, dass der Slider in 7-Tage-Schritten springt (schont die APIs zusätzlich)
+    days = st.slider("Zeitraum (Tage)", min_value=7, max_value=90, value=30, step=7)
+    
+    dataset_options = {
+        "Bitcoin Preis ($)": "crypto",
+        "US-Zinsen (%)": "fred",
+        "Wetter Berlin (°C)": "weather",
+        "EUR/USD Wechselkurs": "exchange",
+        "NASA Asteroiden": "nasa"
+    }
+
+    st.subheader("Datenquellen vergleichen")
+    ds1_name = st.selectbox("Datensatz 1", list(dataset_options.keys()), index=0)
+    ds2_name = st.selectbox("Datensatz 2", list(dataset_options.keys()), index=1)
+    
+    # Der Submit-Button! Erst wenn der geklickt wird, lädt die Seite die Daten.
+    submit_button = st.form_submit_button("Daten analysieren 🚀")
 
 dataset_options = {
     "Bitcoin Preis ($)": "crypto",
