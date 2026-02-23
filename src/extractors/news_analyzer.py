@@ -1,13 +1,20 @@
 import os
 import requests
 
-def get_news_and_analyze(thema, language="de"):
+# NEU: Wir fügen den Parameter test_mode=False hinzu
+def get_news_and_analyze(thema, language="de", test_mode=False):
     """
-    Sucht aktuelle Nachrichten zum Thema und lässt die Groq KI den Grund für den Trend erklären.
+    Sucht aktuelle Nachrichten zum Thema und lässt die Groq KI den Grund erklären.
+    Im test_mode werden keine echten APIs aufgerufen.
     """
     print(f"📰 Suche nach dem 'Warum' für das Thema: {thema}...")
     
-    # Keys aus GitHub Secrets laden
+    # 🛑 TEST-MODUS ABFANGEN
+    if test_mode:
+        print("🛠️ TEST-MODUS AKTIV: Überspringe GNews und Groq APIs, um Tokens zu sparen!")
+        return "🛠️ [TEST-MODUS] Dies ist ein Platzhalter. Hier würde normalerweise die KI erklären, warum das Thema trendet."
+    
+    # --- Ab hier läuft der normale, echte API-Code ---
     gnews_key = os.getenv("GNEWS_API_KEY")
     groq_key = os.getenv("GROQ_API_KEY")
     
@@ -15,10 +22,7 @@ def get_news_and_analyze(thema, language="de"):
         print("⚠️ Warnung: GNews oder Groq API Keys fehlen. Überspringe News-Analyse.")
         return ""
         
-    # Thema bereinigen (aus "Eric_Dane" wird "Eric Dane")
     query = thema.replace('_', ' ')
-    
-    # 1. Nachrichten über GNews suchen (Die Top 3 der aktuellsten Artikel)
     gnews_url = f"https://gnews.io/api/v4/search?q={query}&lang={language}&max=3&apikey={gnews_key}"
     
     try:
@@ -30,13 +34,11 @@ def get_news_and_analyze(thema, language="de"):
             print("ℹ️ Keine aktuellen Nachrichten zu diesem Thema gefunden.")
             return ""
             
-        # Text für die KI zusammenbauen
         news_context = ""
         for i, article in enumerate(articles):
             news_context += f"{i+1}. {article['title']} - {article['description']}\n"
             
-        # 2. KI analysieren lassen (via Groq)
-        print("🧠 Lasse Groq KI (Llama 3) die Nachrichten analysieren...")
+        print("🧠 Lasse Groq KI (Llama 3.1) die Nachrichten analysieren...")
         
         groq_url = "https://api.groq.com/openai/v1/chat/completions"
         headers = {
@@ -44,7 +46,6 @@ def get_news_and_analyze(thema, language="de"):
             "Content-Type": "application/json"
         }
         
-        # Unser "Befehl" an die KI
         prompt = (
             f"Du bist ein Social Media Redakteur. Das Thema '{query}' trendet gerade extrem auf Wikipedia. "
             f"Hier sind die aktuellsten Schlagzeilen dazu:\n\n{news_context}\n\n"
@@ -53,9 +54,8 @@ def get_news_and_analyze(thema, language="de"):
             f"Antworte NUR mit den zwei Sätzen, ohne Einleitung, ohne Grußformel."
         )
         
-        # Wir nutzen Llama 3 von Meta (rasend schnell und sehr intelligent)
         payload = {
-            "model": "llama-3.1-8b-instant", 
+            "model": "llama-3.1-8b-instant", # Dein aktualisiertes Modell!
             "messages": [{"role": "user", "content": prompt}],
             "temperature": 0.7,
             "max_tokens": 150
@@ -67,11 +67,10 @@ def get_news_and_analyze(thema, language="de"):
             groq_data = groq_response.json()
             ai_text = groq_data['choices'][0]['message']['content'].strip()
             
-            # Falls die KI Anführungszeichen drum herum baut, entfernen wir sie
             if ai_text.startswith('"') and ai_text.endswith('"'):
                 ai_text = ai_text[1:-1]
                 
-            print(f"✅ KI-Analyse erfolgreich: {ai_text}")
+            print(f"✅ KI-Analyse erfolgreich abgeschlossen.")
             return ai_text
         else:
             print(f"⚠️ Groq API Fehler: {groq_response.text}")
