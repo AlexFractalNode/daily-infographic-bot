@@ -92,7 +92,9 @@ def get_wikipedia_data(title, language="de", days=30):
             # Wir behalten nur das Wichtigste für den Graphen
             if 'timestamp' in df.columns and 'views' in df.columns:
                 df['timestamp'] = pd.to_datetime(df['timestamp'], format='%Y%m%d%H').dt.date
-                return df[['timestamp', 'views']]
+                # NEU: Wir benennen die Spalte für deinen Plotter wieder in 'Aufrufe' um!
+                df = df.rename(columns={'views': 'Aufrufe'})
+                return df[['timestamp', 'Aufrufe']]
             else:
                 return df
         else:
