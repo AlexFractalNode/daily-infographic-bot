@@ -47,5 +47,5 @@ jobs:
     - name: 💾 Grafik als Artefakt speichern
       uses: actions/upload-artifact@v4
       with:
-        name: infographic
-        path: output/trend_chart.png
+        name: infographic-trend-chart
+        path: output/*.png
