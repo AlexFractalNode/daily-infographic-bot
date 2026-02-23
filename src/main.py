@@ -79,13 +79,22 @@ def generate_smart_caption(df, thema, summary, ai_reason, source_name="Wikipedia
     caption += f"Was denkst du über diese Entwicklung?\n\n"
     
 
-    # NEU: Hashtags säubern (Doppelpunkte, Schrägstriche, Bindestriche etc. entfernen)
-    hashtag_thema = "".join(word.capitalize() for word in thema_clean.split())
-    clean_thema_tag = hashtag_thema.replace(":", "").replace("/", "").replace("-", "").replace(".", "")
+# NEU: Smarte Hashtag-Generierung (Trennt bei Leerzeichen & Slashes, behält Akronyme wie EUR)
+    tags = []
+    # Ersetze Slashes und Bindestriche durch Leerzeichen, damit wir sauber trennen können
+    for word in thema_clean.replace("/", " ").replace("-", " ").split():
+        clean_word = word.replace(':', '').replace('.', '')
+        # Wenn das Wort schon komplett großgeschrieben ist (z.B. EUR, USD), behalten wir das bei
+        if clean_word.isupper():
+            tags.append(f"#{clean_word}")
+        else:
+            tags.append(f"#{clean_word.capitalize()}")
+            
+    clean_thema_tags_str = " ".join(tags)
     clean_source_tag = source_name.replace("/", "").replace(" ", "").replace("-", "")
     
-    caption += f"#{clean_thema_tag} #{clean_source_tag} #DataScience"
-    
+    caption += f"{clean_thema_tags_str} #{clean_source_tag} #DataScience"
+      
     return caption
 
 def main():
