@@ -55,7 +55,7 @@ def get_news_and_analyze(thema, language="de"):
         
         # Wir nutzen Llama 3 von Meta (rasend schnell und sehr intelligent)
         payload = {
-            "model": "llama3-8b-8192", 
+            "model": "llama-3.1-8b-instant", 
             "messages": [{"role": "user", "content": prompt}],
             "temperature": 0.7,
             "max_tokens": 150
