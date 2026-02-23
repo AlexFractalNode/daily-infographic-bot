@@ -27,13 +27,16 @@ def get_weather_data(city="Berlin", lat=52.52, lon=13.41, days=30):
                 print("❌ Keine Wetterdaten erhalten.")
                 return None
                 
-            # Daten für unseren DataFrame verpacken
+            # 1. Erst den DataFrame mit den reinen Text-Daten erstellen
             df = pd.DataFrame({
-                'timestamp': pd.to_datetime(dates).dt.date,
+                'timestamp': dates,
                 'Aufrufe': temps  # Intern nennen wir es 'Aufrufe', damit der Plotter glücklich ist!
             })
             
-            # Die Open-Meteo API liefert manchmal den heutigen Tag doppelt oder unvollständig
+            # 2. NEU: Erst NACHDEM die Spalte existiert, wandeln wir sie in ein Datum um!
+            df['timestamp'] = pd.to_datetime(df['timestamp']).dt.date
+            
+            # Die Open-Meteo API liefert manchmal den heutigen Tag doppelt
             df = df.drop_duplicates(subset=['timestamp'], keep='first')
             
             print(f"✅ Wetter-Daten erfolgreich geladen! (Aktuell: {df['Aufrufe'].iloc[-1]}°C)")
