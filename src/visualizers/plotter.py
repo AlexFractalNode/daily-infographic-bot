@@ -33,9 +33,25 @@ def create_trend_chart(df, thema, source_name="Wikipedia", y_label="Aufrufe"):
         
         ax.grid(color='#38444d', linestyle='--', linewidth=0.5, alpha=0.7)
 
-        ax.fill_between(df.index, df['Aufrufe'], color='#1DA1F2', alpha=0.2)
-        # NEU: Das Label in der Legende passt sich jetzt an (z.B. "Tägliche Vorbeiflüge")
+        # Dynamische Y-Achse berechnen (damit kleine Schwankungen sichtbar werden)
+        min_val = df['Aufrufe'].min()
+        max_val = df['Aufrufe'].max()
+        padding = (max_val - min_val) * 0.2 # 20% Puffer oben und unten
+        
+        # Fallback, falls die Werte absolut identisch sind (z.B. Flatline)
+        if padding == 0: padding = min_val * 0.05 
+        
+        lower_bound = min_val - padding
+        upper_bound = max_val + padding
+        
+        ax.set_ylim(lower_bound, upper_bound)
+
+        # Das eigentliche Plotten (Fläche geht jetzt nur bis zum lower_bound, nicht bis 0!)
+        ax.fill_between(df.index, df['Aufrufe'], lower_bound, color='#1DA1F2', alpha=0.2)
         ax.plot(df.index, df['Aufrufe'], color='#1DA1F2', linewidth=1.5, alpha=0.5, label=f'Tägliche {y_label}')
+        
+        # Legende nach oben links verschieben, damit sie nicht in der Mitte über der Linie schwebt
+        ax.legend(loc='upper left', facecolor=bg_color, edgecolor='#38444d', labelcolor='white')
         
         ax.plot(df.index, df['Trend'], color='#FFD700', linewidth=3, label='7-Tage Trend')
 
