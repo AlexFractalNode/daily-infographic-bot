@@ -109,6 +109,66 @@ def create_trend_chart(df, thema, source_name="Wikipedia", y_label="Aufrufe"):
         
         print(f"✅ Grafik erfolgreich gespeichert unter: {chart_path}")
         return chart_path
+
+    def create_correlation_chart(df, title, label_1, label_2):
+    """
+    Erstellt ein Diagramm mit ZWEI Y-Achsen, um zwei Datensätze zu vergleichen.
+    Erwartet einen DataFrame mit den Spalten 'timestamp', 'Wert1' und 'Wert2'.
+    """
+    print(f"🎨 Generiere Crossover-Grafik: {title}...")
+    
+    os.makedirs("output", exist_ok=True)
+    chart_path = "output/correlation_chart.png"
+    
+    try:
+        if 'timestamp' in df.columns:
+            df = df.set_index('timestamp')
+
+        plt.style.use('dark_background')
+        fig, ax1 = plt.subplots(figsize=(10, 6), dpi=300)
+        
+        bg_color = '#15202b'
+        fig.patch.set_facecolor(bg_color)
+        ax1.set_facecolor(bg_color)
+        ax1.grid(color='#38444d', linestyle='--', linewidth=0.5, alpha=0.7)
+
+        # --- ERSTE Y-ACHSE (Linke Seite, z.B. Bitcoin) ---
+        color1 = '#1DA1F2' # Twitter-Blau
+        ax1.set_ylabel(label_1, color=color1, fontweight='bold')
+        line1 = ax1.plot(df.index, df['Wert1'], color=color1, linewidth=2.5, label=label_1)
+        ax1.tick_params(axis='y', labelcolor=color1)
+
+        # --- ZWEITE Y-ACHSE (Rechte Seite, z.B. Zinsen) ---
+        ax2 = ax1.twinx()  # Hier passiert die Magie: Zweite Achse erstellen!
+        color2 = '#FFD700' # Gold
+        ax2.set_ylabel(label_2, color=color2, fontweight='bold')
+        line2 = ax2.plot(df.index, df['Wert2'], color=color2, linewidth=2.5, linestyle='-', label=label_2)
+        ax2.tick_params(axis='y', labelcolor=color2)
+
+        # Design & Layout
+        plt.title(title, color='white', fontsize=16, fontweight='bold', pad=15)
+        ax1.xaxis.set_major_formatter(mdates.DateFormatter('%d. %b'))
+        plt.setp(ax1.xaxis.get_majorticklabels(), rotation=45, color='#8899a6')
+        
+        for spine in ax1.spines.values(): spine.set_color('#38444d')
+        for spine in ax2.spines.values(): spine.set_color('#38444d')
+
+        # Legenden zusammenführen
+        lines = line1 + line2
+        labels = [l.get_label() for l in lines]
+        ax1.legend(lines, labels, loc='upper center', bbox_to_anchor=(0.5, -0.15), 
+                   ncol=2, facecolor=bg_color, edgecolor='#38444d', labelcolor='white')
+
+        plt.tight_layout()
+        plt.savefig(chart_path, facecolor=fig.get_facecolor(), edgecolor='none', bbox_inches="tight")
+        plt.close()
+        
+        print(f"✅ Crossover-Grafik erfolgreich gespeichert unter: {chart_path}")
+        return chart_path
+        
+    except Exception as e:
+        print(f"❌ Fehler bei der Crossover-Grafikerstellung: {e}")
+        return None
         
     except Exception as e:
         print(f"❌ Fehler bei der Grafikerstellung: {e}")
