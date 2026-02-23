@@ -26,26 +26,49 @@ TEST_MODE = False
 def generate_smart_caption(df, thema, summary, ai_reason, source_name="Wikipedia"):
     """Generiert einen dynamischen Text, passend zur Datenquelle."""
     thema_clean = thema.replace('_', ' ')
-    hashtag_thema = "".join(word.capitalize() for word in thema_clean.split())
     
     try:
         views_col = 'Aufrufe' if 'Aufrufe' in df.columns else df.columns[-1]
         if len(df) >= 14:
             recent_7_days = df[views_col].tail(7).mean()
             previous_7_days = df[views_col].iloc[-14:-7].mean()
-            change_percent = ((recent_7_days - previous_7_days) / previous_7_days) * 100 if previous_7_days > 0 else 0
             
-            if change_percent > 20: trend_insight = f"📈 Starker Anstieg! Die Zahlen stiegen um {change_percent:.1f}%."
-            elif change_percent < -20: trend_insight = f"📉 Deutlicher Rückgang um {abs(change_percent):.1f}%."
-            elif change_percent > 0: trend_insight = f"↗️ Leichtes Wachstum (+{change_percent:.1f}%)."
-            else: trend_insight = f"↘️ Leichter Rückgang (-{abs(change_percent):.1f}%)."
+            # --- NEU: Spezielle Logik für Temperaturen (Absolute Differenz statt Prozent) ---
+            if source_name == "Umwelt/DWD":
+                diff = recent_7_days - previous_7_days
+                if diff > 2:
+                    trend_insight = f"📈 Deutlich wärmer! Im Schnitt {diff:.1f}°C wärmer als in der Vorwoche."
+                elif diff < -2:
+                    trend_insight = f"📉 Spürbar kälter! Im Schnitt {abs(diff):.1f}°C kälter als in der Vorwoche."
+                elif diff > 0:
+                    trend_insight = f"↗️ Leicht wärmer (+{diff:.1f}°C zur Vorwoche)."
+                else:
+                    trend_insight = f"↘️ Leicht kälter (-{abs(diff):.1f}°C zur Vorwoche)."
+                    
+            # --- Standard-Logik für Wikipedia, NASA, Krypto (Prozentuale Differenz) ---
+            else:
+                change_percent = ((recent_7_days - previous_7_days) / previous_7_days) * 100 if previous_7_days > 0 else 0
+                if change_percent > 20: 
+                    trend_insight = f"📈 Starker Anstieg! Die Zahlen stiegen um {change_percent:.1f}%."
+                elif change_percent < -20: 
+                    trend_insight = f"📉 Deutlicher Rückgang um {abs(change_percent):.1f}%."
+                elif change_percent > 0: 
+                    trend_insight = f"↗️ Leichtes Wachstum (+{change_percent:.1f}%)."
+                else: 
+                    trend_insight = f"↘️ Leichter Rückgang (-{abs(change_percent):.1f}%)."
         else:
             trend_insight = "📊 Entwicklung der letzten 30 Tage."
     except Exception:
         trend_insight = "📊 Entwicklung der letzten 30 Tage."
 
-    # Text flexibel zusammenbauen
-    caption = f"🪐 Der tägliche {source_name}-Datenpunkt!\n\n" if source_name == "NASA" else f"🔍 Der tägliche {source_name}-Trend!\n\n"
+    # Text flexibel zusammenbauen (mit passenden Emojis!)
+    if source_name == "NASA":
+        caption = f"🪐 Der tägliche {source_name}-Datenpunkt!\n\n"
+    elif source_name == "Umwelt/DWD":
+        caption = f"🌤️ Der tägliche {source_name}-Trend!\n\n"
+    else:
+        caption = f"🔍 Der tägliche {source_name}-Trend!\n\n"
+        
     caption += f"📌 Thema: {thema_clean}\n"
     
     if summary: caption += f"ℹ️ Info: \"{summary}\"\n\n"
@@ -53,7 +76,13 @@ def generate_smart_caption(df, thema, summary, ai_reason, source_name="Wikipedia
         
     caption += f"{trend_insight}\n\n"
     caption += f"Was denkst du über diese Entwicklung?\n\n"
-    caption += f"#{hashtag_thema} #{source_name} #DataScience"
+    
+    # NEU: Hashtags säubern (Leerzeichen, Doppelpunkte und Schrägstriche entfernen)
+    hashtag_thema = "".join(word.capitalize() for word in thema_clean.split())
+    clean_thema_tag = hashtag_thema.replace(":", "")
+    clean_source_tag = source_name.replace("/", "")
+    
+    caption += f"#{clean_thema_tag} #{clean_source_tag} #DataScience"
     
     return caption
 
