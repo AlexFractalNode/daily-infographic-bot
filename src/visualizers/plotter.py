@@ -55,7 +55,14 @@ def create_trend_chart(df, thema, source_name="Wikipedia", y_label="Aufrufe"):
         
         ax.plot(df.index, df['Trend'], color='#FFD700', linewidth=3, label='7-Tage Trend')
 
-        max_views_str = f"{int(max_views):,}".replace(',', '.')
+        # Den Höchstwert markieren (Pfeil & Text)
+        # Smarte Formatierung: Große Zahlen mit Tausenderpunkt, kleine Zahlen mit Kommastellen
+        if max_views < 10:
+            max_views_str = f"{max_views:.4f}" # Für Wechselkurse (z.B. 1.1974)
+        elif max_views < 100:
+            max_views_str = f"{max_views:.1f}" # Für Temperaturen (z.B. 11.5)
+        else:
+            max_views_str = f"{int(max_views):,}".replace(',', '.') # Für Klicks/Krypto (z.B. 250.000)
         
         ax.annotate(f'Peak: {max_views_str}',
                     xy=(max_date, max_views),
