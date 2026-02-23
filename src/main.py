@@ -7,6 +7,7 @@ from extractors.wikipedia_api import get_wikipedia_data, get_top_wikipedia_trend
 from extractors.news_analyzer import get_news_and_analyze
 from extractors.nasa_api import get_nasa_neo_data
 from extractors.crypto_api import get_crypto_data
+from extractors.weather_api import get_weather_data
 
 # --- Engine Tools ---
 from visualizers.plotter import create_trend_chart
