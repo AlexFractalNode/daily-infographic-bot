@@ -8,6 +8,7 @@ from extractors.news_analyzer import get_news_and_analyze
 from extractors.nasa_api import get_nasa_neo_data
 from extractors.crypto_api import get_crypto_data
 from extractors.weather_api import get_weather_data
+from extractors.exchange_api import get_exchange_rate_data
 
 # --- Engine Tools ---
 from visualizers.plotter import create_trend_chart
@@ -15,8 +16,8 @@ from publishers.social_poster import post_to_telegram
 from publishers.social_poster import post_to_twitter
 
 # === CORE ENGINE KONFIGURATION ===
-# Wähle hier das Modul für den heutigen Tag: "WIKIPEDIA" oder "NASA" oder "CRYPTO" oder "WEATHER"
-ACTIVE_MODULE = "WEATHER"
+# Wähle hier das Modul für den heutigen Tag: "WIKIPEDIA" oder "NASA" oder "CRYPTO" oder "WEATHER" oder "EXCHANGE"
+ACTIVE_MODULE = "EXCHANGE"
 
 ENABLE_TELEGRAM = True
 ENABLE_TWITTER = False
@@ -136,6 +137,15 @@ def main():
         # Wir lassen die News-Analyse hier vorerst leer, da lokale Wetter-News oft schwer in 2 Sätzen zusammenzufassen sind.
         ai_reason = "" 
         df = get_weather_data(city="Berlin", lat=52.52, lon=13.41, days=30)
+
+    elif ACTIVE_MODULE == "EXCHANGE":
+        source_name = "EZB"
+        y_label = "USD pro 1 EUR ($)"
+        thema = "Wechselkurs EUR/USD"
+        summary = "Der offizielle Referenzkurs der Europäischen Zentralbank (EZB). Er zeigt, wie viele US-Dollar man aktuell für einen Euro bekommt."
+        # KI-Analyse einschalten!
+        ai_reason = get_news_and_analyze("Euro Dollar Wechselkurs Wirtschaft", "de", test_mode=TEST_MODE)
+        df = get_exchange_rate_data(base="EUR", target="USD", days=30)
         
     else:
         print(f"❌ Unbekanntes Modul: {ACTIVE_MODULE}")
