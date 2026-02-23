@@ -56,13 +56,32 @@ def create_trend_chart(df, thema, source_name="Wikipedia", y_label="Aufrufe"):
         ax.plot(df.index, df['Trend'], color='#FFD700', linewidth=3, label='7-Tage Trend')
 
         # Den Höchstwert markieren (Pfeil & Text)
-        # Smarte Formatierung: Große Zahlen mit Tausenderpunkt, kleine Zahlen mit Kommastellen
         if max_views < 10:
-            max_views_str = f"{max_views:.4f}" # Für Wechselkurse (z.B. 1.1974)
+            max_views_str = f"{max_views:.4f}" 
         elif max_views < 100:
-            max_views_str = f"{max_views:.1f}" # Für Temperaturen (z.B. 11.5)
+            max_views_str = f"{max_views:.1f}" 
         else:
-            max_views_str = f"{int(max_views):,}".replace(',', '.') # Für Klicks/Krypto (z.B. 250.000)
+            max_views_str = f"{int(max_views):,}".replace(',', '.') 
+            
+        # Die passende Einheit zum Modul finden
+        unit = ""
+        if source_name == "Makro/FRED":
+            unit = "%"
+        elif source_name == "Umwelt/DWD":
+            unit = "°C"
+        elif source_name == "EZB":
+            unit = " $"
+        elif source_name == "Krypto":
+            unit = " $"
+            
+        # Hänge die Einheit direkt an den Peak-String an!
+        ax.annotate(f'Peak: {max_views_str}{unit}',
+                    xy=(max_date, max_views),
+                    xytext=(10, 20), 
+                    textcoords='offset points',
+                    color='white',
+                    fontweight='bold',
+                    arrowprops=dict(arrowstyle="->", color='#FFD700', lw=1.5))
         
         ax.annotate(f'Peak: {max_views_str}',
                     xy=(max_date, max_views),
